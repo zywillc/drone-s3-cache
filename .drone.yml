@@ -25,6 +25,7 @@ pipeline:
   build_linux_amd64:
     when:
       event: push
+      branch: master
     image: golang:1.11
     pull: true
     group: build
@@ -51,6 +52,7 @@ pipeline:
       - latest
     when:
       event: [ push, tag ]
+      branch: master
 
   slack_notify:
     image: plugins/slack
@@ -59,7 +61,7 @@ pipeline:
     username: drone
     image_url: https://privacy.com.ph/site/wp-content/uploads/2017/04/pass.jpg
     icon_emoji: ":drone:"
-    template: "REPO:{{repo.name}}   BUILD:{{build.number}}\n BRANCH:{{build.branch}}   COMMIT:{{truncate build.commit 8}}\n TRIGGERED by {{build.author}}   Succeeded."
+    template: "REPO:{{repo.name}}   BUILD:{{build.number}}\n BRANCH:{{build.branch}}   COMMIT:{{truncate build.commit 8}}\n MESSAGE:{{build.message}}\n TRIGGERED by {{build.author}}   Succeeded."
     when:
       status: [ success, changed ]
       event: push
@@ -71,7 +73,7 @@ pipeline:
     username: drone
     image_url: http://eightball.ie/wp-content/uploads/sites/377/2016/05/FAIL.png
     icon_emoji: ":drone:"
-    template: "REPO:{{repo.name}}   BUILD:{{build.number}}\n BRANCH:{{build.branch}}   COMMIT:{{truncate build.commit 8}}\n TRIGGERED by {{build.author}}   Failed.\n Please fix it."
+    template: "REPO:{{repo.name}}   BUILD:{{build.number}}\n BRANCH:{{build.branch}}   COMMIT:{{truncate build.commit 8}}\n MESSAGE:{{build.message}}\n TRIGGERED by {{build.author}}   Failed.\n Please fix it."
     when:
       status: failure
       event: push
