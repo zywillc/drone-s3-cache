@@ -2,6 +2,9 @@ workspace:
   base: /go
   path: src/github.com/drone-plugins/drone-s3-cache
 
+branches:
+  - feature/break_tar_limit
+
 pipeline:
   deps:
     image: golang:1.11
@@ -39,12 +42,11 @@ pipeline:
     secrets: [ ecr_access_key, ecr_secret_key]
 
     registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
-    repo: 795250896452.dkr.ecr.us-east-1.amazonaws.com/${NAMESPACE}/${DRONE_REPO_NAME}
+    repo: 795250896452.dkr.ecr.us-east-1.amazonaws.com/datawarehouse/${DRONE_REPO_NAME}
     create_repository: true
 
     tags:
-      - linux_amd64-${DRONE_TAG}
-      - git-${DRONE_COMMIT_SHA:0:7}
+      - linux_amd64_${DRONE_COMMIT_SHA:0:7}
       - latest
     dockerfile: Dockerfile
     when:
