@@ -4,6 +4,7 @@ workspace:
 
 branches:
   - feature/break_tar_limit
+  - master
 
 pipeline:
   deps:
@@ -22,6 +23,8 @@ pipeline:
       - go test -cover ./...
 
   build_linux_amd64:
+    when:
+      event: push
     image: golang:1.11
     pull: true
     group: build
@@ -38,17 +41,14 @@ pipeline:
         fi
 
   publish_linux_amd64:
-    image: plugins/ecr
-    secrets: [ ecr_access_key, ecr_secret_key]
-
-    registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
-    repo: 795250896452.dkr.ecr.us-east-1.amazonaws.com/datawarehouse/${DRONE_REPO_NAME}
-    create_repository: true
-
-    tags:
-      - linux_amd64_${DRONE_COMMIT_SHA:0:7}
-      - latest
+    image: plugins/docker
+    pull: true
+    secrets: [ docker_username, docker_password ]
+    repo: zywillc/drone-s3-cache
     dockerfile: Dockerfile
+    tags:
+      - git-${DRONE_COMMIT_SHA:0:7}
+      - latest
     when:
       event: [ push, tag ]
 
