@@ -5,7 +5,8 @@ import (
 	pathutil "path"
 	"time"
 
-	"github.com/drone/drone-cache-lib/archive/util"
+	"io"
+	"os"
 	"github.com/drone/drone-cache-lib/cache"
 	"github.com/drone/drone-cache-lib/storage"
 	log "github.com/sirupsen/logrus"
@@ -35,11 +36,37 @@ const (
 	FlushMode = "flush"
 )
 
+type dummyArchive struct{
+	Filename string
+}
+
+func (a *dummyArchive) Pack(srcs []string, w io.Writer) error {
+	return nil
+}
+
+func (a *dummyArchive) Unpack(dst string, r io.Reader) error {
+	target := pathutil.Join(dst, a.Filename)
+	f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, 0777)
+	if err != nil {
+		return err
+	}
+
+	// copy over contents
+	_, err = io.Copy(f, r)
+
+	// Explicitly close otherwise too many files remain open
+	f.Close()
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
 // Exec runs the plugin
 func (p *Plugin) Exec() error {
 	var err error
 
-	at, err := util.FromFilename(p.Filename)
+	at := &dummyArchive{p.Filename}
 
 	if err != nil {
 		return err
